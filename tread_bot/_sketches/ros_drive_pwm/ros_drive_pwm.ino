@@ -1,5 +1,6 @@
 #include <ros.h>
 #include <geometry_msgs/Twist.h>
+#include <Servo.h>
 
 
 // ++++++++++++++++++++++++++++++ TO RUN THIS NODE: +++++++++++++++++++++++++++
@@ -8,11 +9,15 @@
 // Then publish a Twist message to the topic using:
 //     rostopic pub cmd_vels geometry_msgs/Twist -- '[0.0, 0.0, 0.0]' '[0.0, 0.0, 0.0]'
 
+Servo left;
+Servo right;
+
+
 
 #define LEFT 9
 #define RIGHT 10
 
-float wheelbase = 20.0; // cm NEED TO ACTUALLY MEASURE
+float wheelbase = 0.2;   // m, measured
 
 ros::NodeHandle motor_node;
 
@@ -25,14 +30,30 @@ void msgCallback(const geometry_msgs::Twist& cmd_vels) {
   
   // Translate commanded velocities to duty cycles
 
-  // left_vel   = cmd_lin_vel - cmd_ang_vel*(wheelbase*0.5);
-  // right_duty = cmd_lin_vel + cmd_ang_vel*(wheelbase*0.5);
+  float left_vel  = cmd_lin_vel - cmd_ang_vel*(wheelbase*0.5);
+  float right_vel = cmd_lin_vel + cmd_ang_vel*(wheelbase*0.5);
 
-  // left_duty  = left_vel * 500;
-  // right_duty = right_vel * 500;
+  int left_duty  = 127 + round( 127.0 * (left_vel / 0.76) );
+  int right_duty = 127 + round( 127.0 * (right_vel / 0.76) );
 
-  analogWrite(LEFT, cmd_lin_vel);  //left_duty);
-  analogWrite(RIGHT, cmd_ang_vel);  //right_duty);
+  if (left_duty > 255) {
+    left_duty = 255;
+  }
+  if (left_duty < 0) {
+    left_duty = 0;
+  }
+  if (right_duty > 255) {
+    right_duty = 255;
+  }
+  if (right_duty < 0) {
+    right_duty = 0;
+  }
+
+  left.write(map(left_duty, 0, 255, 40, 140));
+  right.write(map(right_duty, 0, 255, 40, 140));
+  
+  //analogWrite(LEFT, left_duty);
+  //analogWrite(RIGHT, right_duty);
 }
 
 ros::Subscriber <geometry_msgs::Twist> vel_subscriber("/cmd_vels", &msgCallback);
@@ -40,12 +61,18 @@ ros::Subscriber <geometry_msgs::Twist> vel_subscriber("/cmd_vels", &msgCallback)
 
 void setup()
 {
-  pinMode(LEFT, OUTPUT);
-  pinMode(RIGHT, OUTPUT);
+  left.attach(9);
+  right.attach(10);
+
+  left.write(90);
+  right.write(90);
+
+  //pinMode(LEFT, OUTPUT);
+  //pinMode(RIGHT, OUTPUT);
 
   // Initialize motors at stopped
-  analogWrite(LEFT, 0);
-  analogWrite(RIGHT, 0);
+  //analogWrite(LEFT, 127);
+  //analogWrite(RIGHT, 127);
 
   motor_node.initNode();
   motor_node.subscribe(vel_subscriber);
@@ -54,5 +81,9 @@ void setup()
 
 void loop()
 {
+  //left.write(120);
+  //right.write(120);
+  //analogWrite(LEFT, 127);
+  //analogWrite(RIGHT, 127);
   motor_node.spinOnce(); 
 }
