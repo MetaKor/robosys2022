@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 # Copyright (c) 2011, Willow Garage, Inc.
 # All rights reserved.
@@ -42,8 +42,8 @@ else:
 MAX_LIN_VEL = 0.5
 MAX_ANG_VEL = 5.0
 
-LIN_VEL_STEP_SIZE = 0.5
-ANG_VEL_STEP_SIZE = 0.05
+LIN_VEL_STEP_SIZE = 0.05
+ANG_VEL_STEP_SIZE = 0.5
 
 msg = """
 Control the tread_bot!
