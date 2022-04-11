@@ -3,17 +3,19 @@
 ip=$(hostname -I)
 ip=${ip::-1}
 
+name=$(hostname)
 
 # ---- Slack API ----
-A="text=SSH into the RasPi using \`ssh ubuntu@\""
-B="\"\`"
-msg="$A$ip$B"
+A="text=SSH into \`"
+B="\` using \`ssh ubuntu@\""
+C="\"\`"
+msg="$A$name$B$ip$C"
 
 # You will need to source own channel ID and API token
 # See the README for details
 
 curl https://slack.com/api/chat.postMessage \
 -d "$msg" \
--d "channel=??????_CHANNEL_ID_??????" \
--H "Authorization: Bearer xoxb-??????_API_TOKEN??????" \
+-d "channel=????????????" \
+-H "Authorization: Bearer xoxb-??????????" \
 -X POST
